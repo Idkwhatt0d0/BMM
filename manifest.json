@@ -5,5 +5,10 @@
     "type": "native",
     "platform": "${modPlatform}",
     "author": "Ryan",
-    "description": "BMM (Bedrock Mod Menu): Mods button on the title screen and an ImGui mod browser."
+    "description": "BMM (Bedrock Mod Menu): Mods button and mod browser, drawn in OreUI through DearOreUI.",
+    "dependencies": [
+        {
+            "name": "DearOreUI"
+        }
+    ]
 }

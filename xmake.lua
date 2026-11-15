@@ -1,21 +1,23 @@
 add_rules("mode.debug", "mode.release")
 
 add_repositories("levimc-repo https://github.com/LiteLDev/xmake-repo.git")
+-- DearOreUI's header-only public API package (same source the official example mod uses).
+add_repositories("dearoreui-repo https://github.com/copper-lamp/dearoreui-repo.git")
 
--- BMM is a client-only mod (draws over the game's D3D12 swapchain).
 option("target_type")
     set_default("client")
     set_showmenu(true)
     set_values("client")
 option_end()
 
--- Match the LeviLamina you run, e.g. add_requires("levilamina 26.60.x", ...). Unpinned = latest.
+-- Pin to your LeviLamina if you want, e.g. add_requires("levilamina 26.60.7", ...).
+-- NOTE: DearOreUI and its example are written against 26.10.x. The public headers must match the
+-- DearOreUI.dll you actually run, or structs drift and the game crashes. If you installed DearOreUI
+-- 0.1.2, use that version here; add_requires("dearoreui") alone takes whatever the repo offers.
 add_requires("levilamina", {configs = {target_type = get_config("target_type")}})
+add_requires("dearoreui")
+add_requires("nlohmann_json")
 add_requires("levibuildscript")
-
--- UI / hooking deps. Built with the same runtime as the mod (MD, set below).
-add_requires("imgui", {configs = {win32 = true, dx12 = true}})
-add_requires("minhook")
 
 if not has_config("vs_runtime") then
     set_runtimes("MD")
@@ -42,12 +44,27 @@ target("BMM")
             {tools = {"clang_cl"}}
         )
         set_toolchains("clang-cl")
-        add_syslinks("d3d12", "dxgi", "shell32", "user32")
     end
-    add_packages("levilamina", "imgui", "minhook")
+    add_packages("levilamina", "dearoreui", "nlohmann_json")
     set_kind("shared")
     set_languages("c++20")
     set_symbols("debug")
     add_headerfiles("src/**.h")
     add_files("src/**.cpp")
     add_includedirs("src")
+
+    -- Ship the page script next to the DLL (loaded at registration via getModDir()/scripts).
+    after_build(function(target)
+        local mod_define = target:extraconf("rules", "@levibuildscript/modpacker") or {}
+        local modName    = mod_define.modName or target:name()
+        local srcDir     = path.join(os.scriptdir(), "assets", "scripts")
+        if os.isdir(srcDir) then
+            local outDir = path.join(os.projectdir(), "bin", modName, "scripts")
+            os.mkdir(outDir)
+            os.cp(path.join(srcDir, "*"), outDir)
+        end
+        local cfg = path.join(os.scriptdir(), "config.json")
+        if os.isfile(cfg) then
+            os.cp(cfg, path.join(os.projectdir(), "bin", modName, "config.json"))
+        end
+    end)

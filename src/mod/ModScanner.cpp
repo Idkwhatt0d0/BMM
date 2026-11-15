@@ -116,3 +116,25 @@ ScanResult scanMods(const std::filesystem::path& modsDir) {
 }
 
 } // namespace bmm
+
+namespace bmm {
+
+std::string toJson(const ScanResult& r) {
+    nlohmann::json out;
+    out["counts"] = {{"total", r.mods.size()}, {"native", r.native}, {"preload", r.preload},
+                     {"other", r.other},       {"libraries", r.libraries}, {"disabled", r.disabled}};
+    auto& arr = out["mods"] = nlohmann::json::array();
+    for (auto const& m : r.mods) {
+        std::string desc = m.description.substr(0, 400);
+        arr.push_back({{"name", m.name},         {"version", m.version},
+                       {"description", desc},    {"license", m.license},
+                       {"type", m.typeRaw},      {"state", m.state},
+                       {"authors", m.authors},   {"deps", m.dependencies},
+                       {"folder", std::string(reinterpret_cast<const char*>(m.folder.u8string().c_str()))}, {"enabled", m.enabled},
+                       {"library", m.isLibrary}, {"parent", m.parent}});
+    }
+    // error_handler_t::replace: never throw on invalid UTF-8 from a manifest.
+    return out.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
+}
+
+} // namespace bmm

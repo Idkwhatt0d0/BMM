@@ -1,11 +1,13 @@
 # BMM (Bedrock Mod Menu)
 
-Client-only LeviLamina mod: adds a "Mods (N)" button to the title screen and an ImGui mod browser for
-everything in `...\LeviLauncher\Instances\<instance>\mods\` (native + preload-native, libraries,
-parent/child, disabled mods, details, search/sort).
+Client LeviLamina mod that adds a "Mods (N)" button and a mod browser to Minecraft Bedrock's OreUI,
+built as an external mod on [DearOreUI](https://github.com/copper-lamp/Dear-OreUI) (required).
 
-Build: `xmake f -y -p windows -a x64 -m release` then `xmake`. Output in `bin/BMM/`; copy into `mods/`.
+- C++: scans `<instance>\mods\*\manifest.json(.close)` and serves it to the page through the host method `bmm.list`.
+- JS: `assets/scripts/bmm_ui.js` draws the button and panel (search, sort, libraries toggle, parent/child, badges, details).
+- `config.json` (next to the DLL): `{"scopes":["any"]}`. Narrow to `main_menu`, `play`, ... once you know the title screen's scope.
 
-Status: not built or run yet. Untested: D3D12 vs D3D11 presenting, title-screen detection (no Level),
-imgui package under clang-cl, legacy `ImGui_ImplDX12_Init` signature. Catalogue (levimc.org) is a stub, see
-`src/mod/Catalogue.h`. Update `lip.toml` id and the LeviLamina range to match your install.
+Build: `xmake f -y -p windows -a x64 -m release` then `xmake`; copy `bin/BMM/` into `mods/`. DearOreUI must be installed.
+
+Status: not built or run. Depends on DearOreUI supporting your game version (it targets LeviLamina 26.10.x).
+Not done: levimc.org catalogue data (icon/license/README), enable/disable toggle, open-folder button.
