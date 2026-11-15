@@ -6,7 +6,7 @@ version = "0.1.0"
 name = "BMM"
 description = "Bedrock Mod Menu: Mods button and mod browser for LeviLauncher"
 tags = []
-logo = "https://github.com/Idkwhatt0d0/BMM/icon.png"
+logo = "https://raw.githubusercontent.com/Idkwhatt0d0/BMM/main/icon.png"
 
 # The default variant has an entry for each side: the server build for servers and the client
 # build for clients, so the mod is installed as "<id>" on either side.
